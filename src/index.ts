@@ -10,6 +10,10 @@ type UserWithPosts = UserGetPayload<{
   include: { posts: true }
 }>
 
+type MostRecentPost = {
+  'most-recent-post': String
+}
+
 function uppercaseNameAndTitle(postWithAuthor: PostWithAuthor) {
   postWithAuthor.title = postWithAuthor.title.toUpperCase()
   if (postWithAuthor.author) {
@@ -25,72 +29,91 @@ function getUserWithPostSentence(userWithPosts: UserWithPosts) {
 }
 
 async function main() {
-  // const post = await prisma.post.create({
-  //   data: {
-  //     title: 'Hello World!'
-  //   }
-  // });
-
-  // const user = await prisma.user.create({
-  //   data: {
-  //     name: 'Alice',
-  //     email: 'alice@prisma.io'
-  //   }
-  // })
-  // console.log(user);
-
-  const allUsers = await prisma.user.findMany();
-  console.log(allUsers);
-
+  // task 1
   const allPosts = await prisma.post.findMany();
-  console.log(allPosts);
+  console.log(allPosts)
 
-  // const postWithAuthor = await prisma.post.findOne({
-  //   where: { id: 1 },
-  //   include: { author: true }
-  // })
-  // console.log(postWithAuthor);
+  // task 2
+  const post0 = await prisma.post.create({
+    data: {
+      title: 'Hello World!'
+    }
+  })
+  console.log(post0)
 
-  // const userWithPosts = await prisma.user.findOne({
-  //   where: { id: 1 },
-  //   include: { posts: true }
-  // })
-  // console.log(userWithPosts);
+  // task 3
+  const user0 = await prisma.user.create({
+    data: {
+      name: "Alice",
+      email: "alice@prisma.io"
+    }
+  })
+  console.log(user0)
 
-  // const temp1 = uppercaseNameAndTitle(postWithAuthor!);
-  // const temp2 = getUserWithPostSentence(userWithPosts!);
+  // task 4
+  const post1 = await prisma.post.update({
+    where: { id: 1 },
+    data: {
+      author: {
+        connect: { email: "alice@prisma.io" }
+      }
+    }
+  })
+  console.log(post1);
 
-  // console.log({ temp1, temp2 });
+  // task 5
+  const post2 = await prisma.post.findOne({
+    where: { id: 1 },
+    include: { author: true }
+  })
+  console.dir(post2, { depth: null });
 
-  // const sql = `
-  // SELECT MAX ("createdAt") AS "most-recent-post" 
-  // FROM "public"."Post";
-  // `
+  // task 6
+  const post3 = await prisma.post.findOne({
+    where: { id: 1 },
+    include: { author: true }
+  })
+  console.log(post3)
 
-  // const result = await prisma.queryRaw(sql)
-  // console.log(result[0]["most-recent-post"])
+  // task 8
+  const user1 = await prisma.user.create({
+    data: {
+      name: 'Davy',
+      email: 'davy@prisma.io',
+      profile: {
+        create: { bio: "..." }
+      },
+      posts: {
+        create: [{ title: "This is my first post" }, { title: "Here comes a second post" }]
+      }
+    }
+  })
+  console.log(user1)
 
-  // const result = await prisma.user.create({
-  //   data: {
-  //     email: 'davy.hausser@gmail.com',
-  //     name: 'Davy',
-  //     posts: {
-  //       create: { title: 'Hello Prisma Day 2020' }
-  //     },
-  //     profile: {
-  //       create: {
-  //         bio: 'I like pizza'
-  //       }
-  //     }
-  //   }
-  // })
-  // const result = await prisma.user.findMany({
-  //   include: {
-  //     posts: true,
-  //     profile: true
-  //   }
-  // });
-  // console.dir(result, { depth: null });
+  // task 9
+  const postWithAuthor = await prisma.post.findOne({
+    where: { id: 1 },
+    include: { author: true }
+  })
+  console.log(postWithAuthor);
+
+  const userWithPosts = await prisma.user.findOne({
+    where: { id: 1 },
+    include: { posts: true }
+  })
+  console.log(userWithPosts)
+
+  if (postWithAuthor) console.log(uppercaseNameAndTitle(postWithAuthor))
+  if (userWithPosts) console.log(getUserWithPostSentence(userWithPosts))
+
+  // task 10
+  const sql = `
+  SELECT MAX ("createdAt") AS "most-recent-post" 
+  FROM "public"."Post";
+  `
+
+  const users: [MostRecentPost] = await prisma.queryRaw(sql)
+  console.log(users[0]["most-recent-post"])
 }
 
 main()
