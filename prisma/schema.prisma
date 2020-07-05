@@ -7,14 +7,21 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Category {
+  id             Int              @default(autoincrement()) @id
+  name           String?
+  CategoryToPost CategoryToPost[] @relation("CategoryTo_CategoryToPost")
+}
+
 model Post {
-  authorId  Int?
-  content   String?
-  createdAt DateTime @default(now())
-  id        Int      @default(autoincrement()) @id
-  published Boolean  @default(false)
-  title     String
-  author    User?    @relation(fields: [authorId], references: [id])
+  authorId       Int?
+  content        String?
+  createdAt      DateTime         @default(now())
+  id             Int              @default(autoincrement()) @id
+  published      Boolean          @default(false)
+  title          String
+  author         User?            @relation(fields: [authorId], references: [id])
+  CategoryToPost CategoryToPost[] @relation("PostTo_CategoryToPost")
 }
 
 model Profile {
@@ -25,9 +32,24 @@ model Profile {
 }
 
 model User {
-  email   String   @unique
-  id      Int      @default(autoincrement()) @id
-  name    String?
-  posts   Post[]
-  profile Profile?
+  email          String           @unique
+  id             Int              @default(autoincrement()) @id
+  name           String?
+  posts          Post[]
+  profile        Profile?
+  CategoryToPost CategoryToPost[] @relation("UserTo_CategoryToPost")
+}
+
+model CategoryToPost {
+  categoryId Int
+  createdAt  DateTime @default(now())
+  postId     Int
+  userId     Int?
+  Category   Category @relation("CategoryTo_CategoryToPost", fields: [categoryId], references: [id])
+  Post       Post     @relation("PostTo_CategoryToPost", fields: [postId], references: [id])
+  User       User?    @relation("UserTo_CategoryToPost", fields: [userId], references: [id])
+
+  @@index([postId], name: "_CategoryToPost_B_index")
+  @@map("_CategoryToPost")
+  @@unique([categoryId, postId], name: "_CategoryToPost_AB_unique")
 }
